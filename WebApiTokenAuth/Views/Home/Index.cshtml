@@ -1,0 +1,192 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
+<script src="~/signalr/hubs" type="text/javascript"></script>
+
+<div id="divLogin" class="mylogin">
+
+    User Name:<input id="txtUserName" type="text" /><br />
+    UserID :   <input id="txtUserID" type="text" /><br />
+    <input id="btnLogin" type="button" value="Login" />
+    <div id="divalarm"></div>
+</div>
+
+<div id="divChat" class="mylogin">
+
+    <div id="welcome"></div><br />
+    <select id="ddnLevel1" class="divLabel"></select>
+    <input id="txtMessage" type="text" />
+    <input id="btnSendMessage" type="button" value="Send" />
+    <div id="divMessage"></div>
+</div>
+
+<div id="divSendPush" class="mylogin">
+
+    To User Name:<input id="txtToUser" type="text" /><br />
+    Message :   <input id="txtPushMessage" type="text" /><br />
+    <input id="btnSendPush" type="button" value="Send" />
+    <div id="divalarm"></div>
+</div>
+
+<input id="UserID" name="UserID" type="hidden" value="" />
+<input id="Name" name="Name" type="hidden" value="" />
+
+<input id="btndisconnect" type="button" value="disconnect" />
+<script>
+
+    $('#btnSendPush').click(function () {
+
+        $.ajax({
+            url: "Home/SendPush",
+            data: { to_tag: $('#txtToUser').val(), message: $('#txtPushMessage').val() },
+            contentType: 'application/json',
+            async: true,
+            type: 'GET',
+            success: function () {
+
+
+            }
+
+        });
+    });
+
+    $(function () {
+
+        //start the connection
+        var proxy = $.connection.messengerHub;
+        loadClientMethods(proxy);
+
+        $.connection.hub.start().done(function () {
+
+            loadServerEvents(proxy);
+
+        });
+
+        function loadServerEvents(objHub) {
+
+            $("#btnLogin").click(function () {
+
+                var name = $("#txtUserName").val();
+                var userID = $("#txtUserID").val();
+
+                var user = { UserID: userID, Name: name };
+
+                if (name.length > 0) {
+                    // <<<<<-- ***** Return to Server [  Connect  ] *****
+                    objHub.server.connectUser(user);
+
+                }
+                else {
+                    alert("Please Insert UserName and Password");
+                }
+
+            });
+            $('#btndisconnect').click(function () {
+
+                var fromname = $("#txtUserName").val();
+                var fromuserID = $("#txtUserID").val();
+
+                var fromUser = { UserID: fromuserID, Name: fromname, MobileNo: fromname };
+                objHub.server.disconnectUser(fromUser);
+            });
+            $('#btnSendMessage').click(function () {
+             
+                var msg = $("#txtMessage").val();
+
+                if (msg.length > 0) {
+
+                    var id = $('#UserID').val();
+                    var name = $('#Name').val();
+                    var toUser = { UserID: id, Name: name, MobileNo: name };
+
+                    var fromname = $("#txtUserName").val();
+                    var fromuserID = $("#txtUserID").val();
+
+                    var fromUser = { UserID: fromuserID, Name: fromname, MobileNo: fromname };
+
+                    var msgModel = { UserModel: toUser, TextMessage: msg };
+
+                    objHub.server.sendMessage(fromUser, msgModel);
+
+                }
+            });
+
+            $("#txtPassword").keypress(function (e) {
+                if (e.which == 13) {
+                    $("#btnLogin").click();
+                }
+            });
+
+            $("#txtMessage").keypress(function (e) {
+                if (e.which == 13) {
+                    $('#btnSendMessage').click();
+                }
+            });
+        }
+
+        function loadClientMethods(objHub) {
+
+
+            objHub.client.refreshUserList = function (activeUserList) {
+
+                var markup = "<option value=0>--Select--</option>";
+
+                for (var x = 0; x < activeUserList.length; x++) {
+                    markup += "<option value=" + activeUserList[x].UserID + ">" + activeUserList[x].Name + "</option>";
+                }
+                $("#ddnLevel1").html(markup).show();
+            }
+            $('#ddnLevel1').change(function () {
+                var id = $("#ddnLevel1 option:selected").val();
+                var name = $("#ddnLevel1 option:selected").text();
+
+                $('#UserID').val(id);
+                $('#Name').val(name);
+            });
+            objHub.client.getMessages = function (msgModel) {
+
+                $("#txtMessage").val('');
+                $('#divMessage').append('<div><p>' + msgModel.UserModel.Name + ': ' + msgModel.TextMessage + '</p></div>');
+
+                var height = $('#divMessage')[0].scrollHeight;
+                $('#divMessage').scrollTop(height);
+            }
+            objHub.client.onConnected = function (user) {
+
+                var strWelcome = 'Welcome' + +user.Name;
+                $('#welcome').append('<div><p>Welcome:' + user.UserID + '</p></div>');
+                $("#divChat").show();
+                $("#divLogin").hide();
+                objHub.server.getAllUserList()
+            }
+            objHub.client.sendNotification = function () {
+
+                $.ajax({
+                    url: "Home/SendPush",
+                    data: { to_tag: $('#txtToUser').val(), message: $('#txtPushMessage').val() },
+                    contentType: 'application/json',
+                    async: true,
+                    type: 'GET',
+                    success: function () {
+
+
+                    }
+
+                });
+            }
+
+        }
+    });
+</script>
+
+
+
+
+
+
+
