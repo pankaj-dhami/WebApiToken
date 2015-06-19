@@ -83,7 +83,7 @@ namespace WebApiTokenAuth.Controller
         {
             try
             {
-                using (var scope=new TransactionScope())
+                using (var scope = new TransactionScope())
                 {
                     UserMsg fromUser = sendMsgModel.FromUser;
                     MessageModel message = sendMsgModel.Message;
@@ -94,10 +94,13 @@ namespace WebApiTokenAuth.Controller
                     message.UserID = toUser;
 
                     MessengerHub.pendingMessageList.Add(message);
-                    Delegate_SendNotification async = new Delegate_SendNotification(SendNotification);
-                    async.BeginInvoke("gcm", "pendingMessage", toUserMobile, "pankaj", null, null);
+                    if (MessengerHub.pendingMessageList.Where(a => a.UserID == toUser).Count() <= 2)
+                    {
+                        Delegate_SendNotification async = new Delegate_SendNotification(SendNotification);
+                        async.BeginInvoke("gcm", "pendingMessage", toUserMobile, "pankaj", null, null);
+                    } 
                     scope.Complete();
-                    return Ok(); 
+                    return Ok();
                 }
             }
             catch (Exception)
@@ -144,6 +147,6 @@ namespace WebApiTokenAuth.Controller
 
         }
 
-      
+
     }
 }
