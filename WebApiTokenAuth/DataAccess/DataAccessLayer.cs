@@ -34,7 +34,15 @@ namespace WebApiTokenAuth.DataAccess
                         tbluser.MyStatus = user.MyStatus;
                         // tbluser.AboutMe = user.AboutMe;
                         tbluser.ProfilePicUrl = user.PictureUrl;
-                        tbluser.ProfilePicData = user.PicData;
+                        string b64PicData = string.Empty;
+                        //foreach (var item in user.Pic64Data)
+                        //{
+                        //    b64PicData += item;
+                        //}
+                        b64PicData = string.Join("/",user.Pic64Data);
+
+
+                        tbluser.ProfilePicData = Base64Decode(b64PicData);
                         entity.tblAppUsers.Add(tbluser);
                         entity.SaveChanges();
                         result.ResultStatus = (int)AppResultStatus.SUCCESS;
@@ -111,8 +119,7 @@ namespace WebApiTokenAuth.DataAccess
                         result = new UserModel();
                         result.MobileNo = tbluser.MobileNo;
                         result.Name = tbluser.Name;
-                        // result.PicData = tbluser.ProfilePicData;
-                        result.PictureUrl = tbluser.ProfilePicData == null ? string.Empty : Base64Encode(tbluser.ProfilePicData);
+                        result.PicData = tbluser.ProfilePicData;
                         result.MyStatus = tbluser.MobileNo;
                         result.UserID = tbluser.UserID;
                         result.Password = tbluser.Password;
@@ -159,7 +166,7 @@ namespace WebApiTokenAuth.DataAccess
                             {
                                 item.UserID = dbuser.UserID;
                                 item.MyStatus = dbuser.MyStatus;
-                                item.PictureUrl = dbuser.ProfilePicData == null ? string.Empty : Base64Encode(dbuser.ProfilePicData);
+                                item.PicData = dbuser.ProfilePicData;
                                 tblExistinguser.Add(item);
                                 tblAppFriend appFriend = new tblAppFriend();
                                 appFriend.UserID = userID;
@@ -196,7 +203,8 @@ namespace WebApiTokenAuth.DataAccess
                                            UserID = user.UserID,
                                            MyStatus = user.MyStatus,
                                            Name = friend.FriendName,
-                                           MobileNo = user.MobileNo
+                                           MobileNo = user.MobileNo,
+                                           PicData = user.ProfilePicData
 
                                        }).ToList();
                 }
@@ -215,8 +223,15 @@ namespace WebApiTokenAuth.DataAccess
 
         public static byte[] Base64Decode(string base64EncodedData)
         {
-            var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
-            return base64EncodedBytes;
+            if (string.IsNullOrEmpty(base64EncodedData))
+            {
+                return null;
+            }
+            else
+            {
+                var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
+                return base64EncodedBytes;
+            }
         }
     }
 }

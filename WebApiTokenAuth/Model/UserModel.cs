@@ -30,6 +30,7 @@ namespace WebApiTokenAuth.Model
         public string MyStatus { get; set; }
         public string PictureUrl { get; set; }
         public byte[] PicData { get; set; }
+        public IEnumerable<string> Pic64Data { get; set; }
         public int _id { get; set; }
 
         public int PicImg { get; set; }

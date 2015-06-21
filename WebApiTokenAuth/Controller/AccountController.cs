@@ -6,6 +6,9 @@ using WebApiTokenAuth.Model;
 using WebApiTokenAuth.DataAccess;
 using WebApiTokenAuth.Utility;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Drawing.Imaging;
 
 namespace WebApiTokenAuth.Controller
 {
@@ -22,7 +25,7 @@ namespace WebApiTokenAuth.Controller
         // POST api/Account/Register
         [AllowAnonymous]
         [Route("Register"),HttpPost]
-        public HttpResponseMessage Register(UserModel userModel)
+        public HttpResponseMessage Register([FromBody]UserModel userModel)
         {
             if (!ModelState.IsValid)
             {
@@ -77,6 +80,10 @@ namespace WebApiTokenAuth.Controller
         public IHttpActionResult GetUserInfo(string mobileNo)
         {
            var user= _repo.GetUser(mobileNo);
+           using (Image image = Image.FromStream(new MemoryStream(user.PicData)))
+           {
+               image.Save("D:\\output.png", ImageFormat.Png);  // Or Png
+           }
            if (user!=null)
            {
                return Ok(user);
