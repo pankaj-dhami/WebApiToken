@@ -80,10 +80,7 @@ namespace WebApiTokenAuth.Controller
         public IHttpActionResult GetUserInfo(string mobileNo)
         {
            var user= _repo.GetUser(mobileNo);
-           using (Image image = Image.FromStream(new MemoryStream(user.PicData)))
-           {
-               image.Save("D:\\output.png", ImageFormat.Png);  // Or Png
-           }
+           
            if (user!=null)
            {
                return Ok(user);

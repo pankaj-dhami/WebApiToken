@@ -39,7 +39,7 @@ namespace WebApiTokenAuth.DataAccess
                         //{
                         //    b64PicData += item;
                         //}
-                        b64PicData = string.Join("/",user.Pic64Data);
+                        b64PicData = string.Join("/", user.Pic64Data);
 
 
                         tbluser.ProfilePicData = Base64Decode(b64PicData);
@@ -166,7 +166,7 @@ namespace WebApiTokenAuth.DataAccess
                             {
                                 item.UserID = dbuser.UserID;
                                 item.MyStatus = dbuser.MyStatus;
-                                item.PicData = dbuser.ProfilePicData;
+                                item.PictureUrl = Base64Encode(dbuser.ProfilePicData);
                                 tblExistinguser.Add(item);
                                 tblAppFriend appFriend = new tblAppFriend();
                                 appFriend.UserID = userID;
@@ -207,6 +207,12 @@ namespace WebApiTokenAuth.DataAccess
                                            PicData = user.ProfilePicData
 
                                        }).ToList();
+
+                    foreach (var item in tblExistinguser)
+                    {
+                        item.PictureUrl = Base64Encode(item.PicData);
+                        item.PicData = null;
+                    }
                 }
                 catch (Exception)
                 {
@@ -218,7 +224,14 @@ namespace WebApiTokenAuth.DataAccess
 
         public static string Base64Encode(byte[] bytes)
         {
-            return System.Convert.ToBase64String(bytes);
+            if (bytes == null)
+            {
+                return "";
+            }
+            else
+            {
+                return System.Convert.ToBase64String(bytes);
+            }
         }
 
         public static byte[] Base64Decode(string base64EncodedData)
