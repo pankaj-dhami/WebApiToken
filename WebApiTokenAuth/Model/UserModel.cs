@@ -65,7 +65,7 @@ namespace WebApiTokenAuth.Model
         public UserMsg FromUser { get; set; }
     }
 
-    public class RegisterFriendsMdoel
+    public class TelephoneNumberModel
     {
         public string Name { get; set; }
         public string MobileNo { get; set; }

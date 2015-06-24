@@ -143,7 +143,7 @@ namespace WebApiTokenAuth.DataAccess
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public List<UserModel> RegisterFriends(List<RegisterFriendsMdoel> friendList, int userID)
+        public List<UserModel> RegisterFriends(List<TelephoneNumberModel> friendList, int userID)
         {
             List<UserModel> tblExistinguser = null;
             using (AndroidMessengerEntities entity = new AndroidMessengerEntities())
@@ -294,7 +294,7 @@ namespace WebApiTokenAuth.DataAccess
         }
 
         /*Converts List To DataTable*/
-        public static DataTable ToDataTable<TSource>(this IList<TSource> data)
+        public static DataTable ToDataTable<TSource>( IList<TSource> data)
         {
             DataTable dataTable = new DataTable(typeof(TSource).Name);
             PropertyInfo[] props = typeof(TSource).GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -317,7 +317,7 @@ namespace WebApiTokenAuth.DataAccess
         }
 
         /*Converts DataTable To List*/
-        public static List<TSource> ToList<TSource>(this DataTable dataTable) where TSource : new()
+        public static List<TSource> ToList<TSource>( DataTable dataTable) where TSource : new()
         {
             var dataList = new List<TSource>();
 

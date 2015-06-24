@@ -18,7 +18,7 @@ namespace WebApiTokenAuth.Controller
         }
         [AllowAnonymous]
         [HttpPost]
-        public IHttpActionResult POST(int userID, [FromBody] List<UserModel> friendsUserModel)
+        public IHttpActionResult POST(int userID, [FromBody] List<TelephoneNumberModel> friendsUserModel)
         {
             //List<UserModel> friendsUserModel = new List<UserModel>();
             List<UserModel> result = _repo.RegisterFriends(friendsUserModel, userID);
