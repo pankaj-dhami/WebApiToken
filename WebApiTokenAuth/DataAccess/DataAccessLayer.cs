@@ -1,6 +1,11 @@
-﻿using System;
+﻿using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Auth;
+using Microsoft.WindowsAzure.Storage.Blob;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -14,6 +19,17 @@ namespace WebApiTokenAuth.DataAccess
 {
     public class DataAccessLayer
     {
+        string azureStorageAccount;
+        string azureStorageKey;
+        string azureStorageURI;
+
+        public DataAccessLayer()
+        {
+            azureStorageAccount = ConfigurationManager.AppSettings["storageAccount"];
+            azureStorageKey = ConfigurationManager.AppSettings["storageKey"];
+            azureStorageURI = ConfigurationManager.AppSettings["storageURI"];
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -26,28 +42,31 @@ namespace WebApiTokenAuth.DataAccess
             {
                 try
                 {
-                    tblAppUser tbluser = (from item in entity.tblAppUsers
+                    string b64PicData = "";
+
+                    if (user.Pic64Data != null)
+                    {
+                        b64PicData = string.Join("/", user.Pic64Data);
+                    }
+
+
+                    tblappUser tbluser = (from item in entity.tblappUsers
                                           where item.MobileNo == user.MobileNo
                                           select item).FirstOrDefault();
                     if (tbluser == null)
                     {
-                        tbluser = new tblAppUser();
+                        tbluser = new tblappUser();
                         tbluser.MobileNo = user.MobileNo;
                         tbluser.Name = user.Name;
                         tbluser.Password = user.Password;
                         tbluser.MyStatus = user.MyStatus;
-                        // tbluser.AboutMe = user.AboutMe;
-                        tbluser.ProfilePicUrl = user.PictureUrl;
-                        string b64PicData = string.Empty;
-                        //foreach (var item in user.Pic64Data)
-                        //{
-                        //    b64PicData += item;
-                        //}
-                        b64PicData = string.Join("/", user.Pic64Data);
-
-
-                        tbluser.ProfilePicData = Base64Decode(b64PicData);
-                        entity.tblAppUsers.Add(tbluser);
+                        entity.tblappUsers.Add(tbluser);
+                        entity.SaveChanges();
+                        if (!string.IsNullOrEmpty(b64PicData))
+                        {
+                            user.PictureUrl = UploadFileStreamToBlob(Base64Decode(b64PicData), tbluser.UserID + tbluser.MobileNo);
+                        }
+                        tbluser.PicUrl = user.PictureUrl;
                         entity.SaveChanges();
                         result.ResultStatus = (int)AppResultStatus.SUCCESS;
                         result.ResultMessage = ApplicationConstants.Success;
@@ -80,7 +99,7 @@ namespace WebApiTokenAuth.DataAccess
             {
                 try
                 {
-                    tblAppUser tbluser = (from item in entity.tblAppUsers
+                    tblappUser tbluser = (from item in entity.tblappUsers
                                           where item.MobileNo == userName && item.Password == password
                                           select item).FirstOrDefault();
                     if (tbluser != null)
@@ -115,7 +134,7 @@ namespace WebApiTokenAuth.DataAccess
             {
                 try
                 {
-                    tblAppUser tbluser = (from item in entity.tblAppUsers
+                    tblappUser tbluser = (from item in entity.tblappUsers
                                           where item.MobileNo == mobileNo
                                           select item).FirstOrDefault();
                     if (tbluser != null)
@@ -123,7 +142,7 @@ namespace WebApiTokenAuth.DataAccess
                         result = new UserModel();
                         result.MobileNo = tbluser.MobileNo;
                         result.Name = tbluser.Name;
-                        result.PicData = tbluser.ProfilePicData;
+
                         result.MyStatus = tbluser.MobileNo;
                         result.UserID = tbluser.UserID;
                         result.Password = tbluser.Password;
@@ -146,53 +165,43 @@ namespace WebApiTokenAuth.DataAccess
         public List<UserModel> RegisterFriends(List<TelephoneNumberModel> friendList, int userID)
         {
             List<UserModel> tblExistinguser = null;
-            using (AndroidMessengerEntities entity = new AndroidMessengerEntities())
+
+
+            DataTable tableInput = ToDataTable(friendList);
+            using (SqlConnection Conn = new SqlConnection(ConfigurationManager.ConnectionStrings["AndroidMessengerEntitiesADO"].ConnectionString))
             {
                 try
                 {
-                    DataTable friendsData = ToDataTable(friendList);
-
+                    SqlCommand Cmd = new SqlCommand();
+                    Cmd.CommandText = "uspAppUsers";
+                    Cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    Cmd.Parameters.AddWithValue("@TblData", tableInput);
+                    Cmd.Parameters.AddWithValue("@userID", userID);
+                    Conn.Open();
+                    Cmd.Connection = Conn;
+                    SqlDataReader reader = Cmd.ExecuteReader();
                     tblExistinguser = new List<UserModel>();
-                    foreach (var item in friendList)
+                    while (reader.Read())
                     {
-                        //item.MobileNo = Regex.Replace(item.MobileNo, @"\s+", "");
-                        //if (item.MobileNo.StartsWith("0"))
-                        //{
-                        //    item.MobileNo = countryCode + item.MobileNo.Remove(0, 1) ;
-                            
-                        //}
-
-                        //var dbuser = (from user in entity.tblAppUsers
-                        //              where user.MobileNo == item.MobileNo
-                        //              select user).AsQueryable().FirstOrDefault();
-                        //if (dbuser != null)
-                        //{
-                        //    var existingFriend = (from user in entity.tblAppFriends
-                        //                          where user.FriendUserID == dbuser.UserID && user.UserID == userID
-                        //                          select user).AsQueryable().FirstOrDefault();
-                        //    if (existingFriend == null)
-                        //    {
-                        //        item.UserID = dbuser.UserID;
-                        //        item.MyStatus = dbuser.MyStatus;
-                        //        item.PictureUrl = Base64Encode(dbuser.ProfilePicData);
-                        //        tblExistinguser.Add(item);
-                        //        tblAppFriend appFriend = new tblAppFriend();
-                        //        appFriend.UserID = userID;
-                        //        appFriend.FriendUserID = item.UserID;
-                        //        appFriend.FriendName = item.Name;
-                        //        entity.tblAppFriends.Add(appFriend);
-                        //    }
-
-                        //}
+                        UserModel model = new UserModel();
+                        model.UserID = (int)reader["UserID"];
+                        model.MobileNo = reader["MobileNo"] == System.DBNull.Value ? string.Empty : (string)reader["MobileNo"];
+                        model.Name = reader["Name"] == System.DBNull.Value ? string.Empty : (string)reader["Name"];
+                        model.MyStatus = reader["MyStatus"] == System.DBNull.Value ? string.Empty : (string)reader["MyStatus"];
+                        model.PictureUrl = reader["PicUrl"] == System.DBNull.Value ? string.Empty : (string)reader["PicUrl"];
+                        tblExistinguser.Add(model);
                     }
-                    entity.SaveChanges();
                 }
                 catch (Exception)
                 {
                     tblExistinguser = null;
                 }
-            }
+                finally
+                {
+                    Conn.Close();
+                }
 
+            }
             return tblExistinguser;
         }
 
@@ -203,16 +212,16 @@ namespace WebApiTokenAuth.DataAccess
             {
                 try
                 {
-                    tblExistinguser = (from friend in entity.tblAppFriends
-                                       join user in entity.tblAppUsers on friend.FriendUserID equals user.UserID
+                    tblExistinguser = (from friend in entity.tblappFriends
+                                       join user in entity.tblappUsers on friend.FriendID equals user.UserID
                                        where friend.UserID == userID
                                        select new UserModel
                                        {
                                            UserID = user.UserID,
                                            MyStatus = user.MyStatus,
-                                           Name = friend.FriendName,
+                                           Name = user.Name,
                                            MobileNo = user.MobileNo,
-                                           PicData = user.ProfilePicData
+                                          PictureUrl=user.PicUrl
 
                                        }).ToList();
 
@@ -294,7 +303,7 @@ namespace WebApiTokenAuth.DataAccess
         }
 
         /*Converts List To DataTable*/
-        public static DataTable ToDataTable<TSource>( IList<TSource> data)
+        public static DataTable ToDataTable<TSource>(IList<TSource> data)
         {
             DataTable dataTable = new DataTable(typeof(TSource).Name);
             PropertyInfo[] props = typeof(TSource).GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -317,7 +326,7 @@ namespace WebApiTokenAuth.DataAccess
         }
 
         /*Converts DataTable To List*/
-        public static List<TSource> ToList<TSource>( DataTable dataTable) where TSource : new()
+        public static List<TSource> ToList<TSource>(DataTable dataTable) where TSource : new()
         {
             var dataList = new List<TSource>();
 
@@ -350,6 +359,49 @@ namespace WebApiTokenAuth.DataAccess
                 dataList.Add(aTSource);
             }
             return dataList;
-        } 
+        }
+
+        /// <summary>
+        /// to upload byte stream to blob 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="fileName"></param>
+        /// <returns> the absolute image path of the uploaded file</returns>
+        public string UploadFileStreamToBlob(byte[] data, string fileName)
+        {
+            string absoluteFilePath = string.Empty;
+            fileName += ".png";
+            try
+            {
+                StorageCredentials credentials = new StorageCredentials(azureStorageAccount, azureStorageKey);
+                CloudStorageAccount account = new CloudStorageAccount(credentials, false);
+
+                CloudBlobClient blobClient = account.CreateCloudBlobClient();
+
+                CloudBlobContainer container = blobClient.GetContainerReference("images");
+
+                container.CreateIfNotExists();
+
+                CloudBlockBlob blob = container.GetBlockBlobReference(Path.GetFileName(fileName));
+
+                var permissions = new BlobContainerPermissions();
+                permissions.PublicAccess = BlobContainerPublicAccessType.Container;
+                container.SetPermissions(permissions);
+
+                //using (BlobStream blobStream = blob.OpenWrite())
+                //{
+                //    blobStream.Write(data, 0, data.Length);
+                //}
+
+                Stream stream = new MemoryStream(data);
+                blob.UploadFromStream(stream);
+                absoluteFilePath = azureStorageURI + "/images/" + fileName;
+            }
+            catch (Exception ex)
+            {
+                absoluteFilePath = string.Empty;
+            }
+            return absoluteFilePath;
+        }
     }
 }

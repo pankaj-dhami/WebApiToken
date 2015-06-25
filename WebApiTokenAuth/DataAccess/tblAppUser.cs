@@ -12,15 +12,14 @@ namespace WebApiTokenAuth.DataAccess
     using System;
     using System.Collections.Generic;
     
-    public partial class tblAppUser
+    public partial class tblappUser
     {
         public int UserID { get; set; }
         public string MobileNo { get; set; }
         public string Name { get; set; }
         public string Password { get; set; }
-        public string AboutMe { get; set; }
         public string MyStatus { get; set; }
-        public string ProfilePicUrl { get; set; }
-        public byte[] ProfilePicData { get; set; }
+        public string PicUrl { get; set; }
+        public int IsPicUpdate { get; set; }
     }
 }

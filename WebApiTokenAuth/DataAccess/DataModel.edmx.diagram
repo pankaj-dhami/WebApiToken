@@ -5,8 +5,8 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="5846bb395d0844989451249794e0b93f" Name="Diagram1">
-        <EntityTypeShape EntityType="AndroidMessengerModel.tblAppUser" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="AndroidMessengerModel.tblAppFriend" Width="1.5" PointX="3.375" PointY="0.75" />
+        <EntityTypeShape EntityType="AndroidMessengerModel.tblappFriend" Width="1.5" PointX="0.75" PointY="0.75" />
+        <EntityTypeShape EntityType="AndroidMessengerModel.tblappUser" Width="1.5" PointX="2.75" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

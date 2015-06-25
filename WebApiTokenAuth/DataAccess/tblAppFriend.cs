@@ -12,11 +12,10 @@ namespace WebApiTokenAuth.DataAccess
     using System;
     using System.Collections.Generic;
     
-    public partial class tblAppFriend
+    public partial class tblappFriend
     {
-        public int row_ID { get; set; }
+        public int id { get; set; }
         public int UserID { get; set; }
-        public int FriendUserID { get; set; }
-        public string FriendName { get; set; }
+        public int FriendID { get; set; }
     }
 }

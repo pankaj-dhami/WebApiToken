@@ -4,62 +4,58 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="AndroidMessengerModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
-        <EntityType Name="tblAppFriends">
+    <Schema Namespace="AndroidMessengerModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="tblappFriends">
           <Key>
-            <PropertyRef Name="row_ID" />
+            <PropertyRef Name="id" />
           </Key>
-          <Property Name="row_ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="UserID" Type="int" Nullable="false" />
-          <Property Name="FriendUserID" Type="int" Nullable="false" />
-          <Property Name="FriendName" Type="varchar" MaxLength="50" />
+          <Property Name="FriendID" Type="int" Nullable="false" />
         </EntityType>
-        <EntityType Name="tblAppUsers">
+        <EntityType Name="tblappUsers">
           <Key>
             <PropertyRef Name="UserID" />
           </Key>
           <Property Name="UserID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="MobileNo" Type="varchar" MaxLength="13" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="50" />
-          <Property Name="Password" Type="varchar" MaxLength="50" />
-          <Property Name="AboutMe" Type="varchar(max)" />
+          <Property Name="MobileNo" Type="varchar" MaxLength="20" />
+          <Property Name="Name" Type="varchar(max)" />
+          <Property Name="Password" Type="varchar(max)" />
           <Property Name="MyStatus" Type="varchar(max)" />
-          <Property Name="ProfilePicUrl" Type="varchar(max)" />
-          <Property Name="ProfilePicData" Type="varbinary(max)" />
+          <Property Name="PicUrl" Type="varchar(max)" />
+          <Property Name="IsPicUpdate" Type="int" Nullable="false" />
         </EntityType>
         <EntityContainer Name="AndroidMessengerModelStoreContainer">
-          <EntitySet Name="tblAppFriends" EntityType="Self.tblAppFriends" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="tblAppUsers" EntityType="Self.tblAppUsers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblappFriends" EntityType="Self.tblappFriends" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tblappUsers" EntityType="Self.tblappUsers" Schema="dbo" store:Type="Tables" />
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="AndroidMessengerModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="tblAppUser">
+        <EntityContainer Name="AndroidMessengerEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="tblappFriends" EntityType="AndroidMessengerModel.tblappFriend" />
+          <EntitySet Name="tblappUsers" EntityType="AndroidMessengerModel.tblappUser" />
+        </EntityContainer>
+        <EntityType Name="tblappFriend">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserID" Type="Int32" Nullable="false" />
+          <Property Name="FriendID" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tblappUser">
           <Key>
             <PropertyRef Name="UserID" />
           </Key>
           <Property Name="UserID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="MobileNo" Type="String" MaxLength="13" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Password" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="AboutMe" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="MobileNo" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Name" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="Password" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="MyStatus" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ProfilePicUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="ProfilePicData" Type="Binary" MaxLength="Max" FixedLength="false" />
-        </EntityType>
-        <EntityContainer Name="AndroidMessengerEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="tblAppUsers" EntityType="Self.tblAppUser" />
-          <EntitySet Name="tblAppFriends" EntityType="AndroidMessengerModel.tblAppFriend" />
-        </EntityContainer>
-        <EntityType Name="tblAppFriend">
-          <Key>
-            <PropertyRef Name="row_ID" />
-          </Key>
-          <Property Name="row_ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="UserID" Type="Int32" Nullable="false" />
-          <Property Name="FriendUserID" Type="Int32" Nullable="false" />
-          <Property Name="FriendName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PicUrl" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="IsPicUpdate" Type="Int32" Nullable="false" />
         </EntityType>
       </Schema>
     </edmx:ConceptualModels>
@@ -67,27 +63,25 @@
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="AndroidMessengerModelStoreContainer" CdmEntityContainer="AndroidMessengerEntities">
-          <EntitySetMapping Name="tblAppUsers">
-            <EntityTypeMapping TypeName="AndroidMessengerModel.tblAppUser">
-              <MappingFragment StoreEntitySet="tblAppUsers">
+          <EntitySetMapping Name="tblappFriends">
+            <EntityTypeMapping TypeName="AndroidMessengerModel.tblappFriend">
+              <MappingFragment StoreEntitySet="tblappFriends">
+                <ScalarProperty Name="FriendID" ColumnName="FriendID" />
                 <ScalarProperty Name="UserID" ColumnName="UserID" />
-                <ScalarProperty Name="MobileNo" ColumnName="MobileNo" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="Password" ColumnName="Password" />
-                <ScalarProperty Name="AboutMe" ColumnName="AboutMe" />
-                <ScalarProperty Name="MyStatus" ColumnName="MyStatus" />
-                <ScalarProperty Name="ProfilePicUrl" ColumnName="ProfilePicUrl" />
-                <ScalarProperty Name="ProfilePicData" ColumnName="ProfilePicData" />
+                <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="tblAppFriends">
-            <EntityTypeMapping TypeName="AndroidMessengerModel.tblAppFriend">
-              <MappingFragment StoreEntitySet="tblAppFriends">
-                <ScalarProperty Name="FriendName" ColumnName="FriendName" />
-                <ScalarProperty Name="FriendUserID" ColumnName="FriendUserID" />
+          <EntitySetMapping Name="tblappUsers">
+            <EntityTypeMapping TypeName="AndroidMessengerModel.tblappUser">
+              <MappingFragment StoreEntitySet="tblappUsers">
+                <ScalarProperty Name="IsPicUpdate" ColumnName="IsPicUpdate" />
+                <ScalarProperty Name="PicUrl" ColumnName="PicUrl" />
+                <ScalarProperty Name="MyStatus" ColumnName="MyStatus" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="MobileNo" ColumnName="MobileNo" />
                 <ScalarProperty Name="UserID" ColumnName="UserID" />
-                <ScalarProperty Name="row_ID" ColumnName="row_ID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

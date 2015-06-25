@@ -25,7 +25,7 @@ namespace WebApiTokenAuth.DataAccess
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<tblAppUser> tblAppUsers { get; set; }
-        public virtual DbSet<tblAppFriend> tblAppFriends { get; set; }
+        public virtual DbSet<tblappFriend> tblappFriends { get; set; }
+        public virtual DbSet<tblappUser> tblappUsers { get; set; }
     }
 }
