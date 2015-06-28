@@ -89,6 +89,61 @@ namespace WebApiTokenAuth.DataAccess
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public AppResultModel UpdateUser(UserModel user)
+        {
+            AppResultModel result = new AppResultModel();
+            using (AndroidMessengerEntities entity = new AndroidMessengerEntities())
+            {
+                try
+                {
+                    string b64PicData = "";
+
+                    if (user.Pic64Data != null)
+                    {
+                        b64PicData = string.Join("/", user.Pic64Data);
+                    }
+
+
+                    tblappUser tbluser = (from item in entity.tblappUsers
+                                          where item.UserID == user.UserID
+                                          select item).FirstOrDefault();
+                    if (tbluser != null)
+                    {
+                        if ( !string.IsNullOrEmpty(user.Name))
+                        {
+                            tbluser.Name = user.Name;
+                        }
+                        if (!string.IsNullOrEmpty(user.MyStatus))
+                        {
+                            tbluser.MyStatus = user.MyStatus;
+                        }
+                        if (!string.IsNullOrEmpty(b64PicData))
+                        {
+                            user.PictureUrl = UploadFileStreamToBlob(Base64Decode(b64PicData), tbluser.UserID + tbluser.MobileNo);
+                            tbluser.PicUrl = user.PictureUrl;
+                            tbluser.IsPicUpdate += 1;
+                        }
+                        entity.SaveChanges();
+                        result.ResultStatus = (int)AppResultStatus.SUCCESS;
+                        result.ResultMessage = ApplicationConstants.Success;
+                    }
+                  
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+
+            return result;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="userName"></param>
         /// <param name="password"></param>
         /// <returns></returns>
@@ -189,6 +244,7 @@ namespace WebApiTokenAuth.DataAccess
                         model.Name = reader["Name"] == System.DBNull.Value ? string.Empty : (string)reader["Name"];
                         model.MyStatus = reader["MyStatus"] == System.DBNull.Value ? string.Empty : (string)reader["MyStatus"];
                         model.PictureUrl = reader["PicUrl"] == System.DBNull.Value ? string.Empty : (string)reader["PicUrl"];
+                        model.IsPicUpdate = (int)reader["IsPicUpdate"];
                         tblExistinguser.Add(model);
                     }
                 }

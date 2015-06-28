@@ -34,6 +34,7 @@ namespace WebApiTokenAuth.Model
         public int _id { get; set; }
 
         public int PicImg { get; set; }
+        public int IsPicUpdate { get; set; }
 
     }
 

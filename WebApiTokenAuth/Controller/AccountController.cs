@@ -46,6 +46,32 @@ namespace WebApiTokenAuth.Controller
             }
         }
 
+          // POST api/Account/Register
+        [AllowAnonymous]
+        [Route("UpdateUser"), HttpPost]
+        public HttpResponseMessage UpdateUser([FromBody]UserModel userModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Request.CreateResponse<System.Web.Http.ModelBinding.ModelStateDictionary>(HttpStatusCode.BadRequest, ModelState);
+              //  return BadRequest(ModelState);   
+            }
+
+            AppResultModel result = _repo.UpdateUser(userModel);
+            if (result.ResultStatus!=(int)AppResultStatus.SUCCESS)
+            {
+              //  return BadRequest(result.ResultMessage);
+                return Request.CreateResponse<AppResultModel>(HttpStatusCode.Conflict, result);
+            }
+            else
+            {
+               // return Ok(result.ResultMessage);
+               return Request.CreateResponse<AppResultModel>(HttpStatusCode.OK, result);
+            }
+        }
+
+        
+
         private IHttpActionResult GetErrorResult(IdentityResult result)
         {
             if (result == null)
