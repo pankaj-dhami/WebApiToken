@@ -14,7 +14,7 @@ namespace WebApiTokenAuth.Model
 
         private Notifications()
         {
-            Hub = NotificationHubClient.CreateClientFromConnectionString("Endpoint=sb://messengerapihub-ns.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=qmVKp9P+G/2UZv7hmc4mS727DXQbES60Ae2KOAPqsAA=", "messengerapihub");
+            Hub = NotificationHubClient.CreateClientFromConnectionString("Endpoint=sb://messengerhub-ns.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=ubfkQbBJFyOVBQuBkM/WAlzogcC6bSKLJhsk6snpDW8=", "messengerhub");
         }
     }
 }

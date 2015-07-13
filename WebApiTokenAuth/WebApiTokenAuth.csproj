@@ -254,9 +254,6 @@
     <Compile Include="DataAccess\tblappUser.cs">
       <DependentUpon>DataModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="DBContext\AuthContext.cs" />
-    <Compile Include="DBContext\AuthRepository.cs" />
-    <Compile Include="DBContext\ModelContext.cs" />
     <Compile Include="Hubs\MessengerHub.cs" />
     <Compile Include="Model\AppResultModel.cs" />
     <Compile Include="Model\Notifications.cs" />
@@ -270,6 +267,7 @@
     <Compile Include="Startup.cs" />
     <Compile Include="Utility\ApplicationConstants.cs" />
     <Compile Include="Utility\ApplicationEnums.cs" />
+    <Compile Include="Utility\BlobUploadUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -297,6 +295,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
     </None>
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>

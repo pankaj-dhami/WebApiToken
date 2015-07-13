@@ -9,6 +9,7 @@ using System.Web;
 using System.Web.Http;
 using WebApiTokenAuth.Hubs;
 using WebApiTokenAuth.Model;
+using WebApiTokenAuth.Utility;
 
 namespace WebApiTokenAuth.Controller
 {
@@ -83,25 +84,41 @@ namespace WebApiTokenAuth.Controller
         {
             try
             {
+
+                UserMsg fromUser = sendMsgModel.FromUser;
+                MessageModel message = sendMsgModel.Message;
+
+                int toUser = message.UserModel.UserID;
+                string toUserMobile = message.UserModel.MobileNo;
+                message.UserModel = fromUser;
+                message.UserID = toUser;
+
+                if (message.IsAttchment)
+                {
+                    if (message.Pic64Data != null && message.Pic64Data.Count() > 0)
+                    {
+                        string b64PicData = string.Join("/", message.Pic64Data);
+                        if (!string.IsNullOrEmpty(b64PicData))
+                        {
+                            message.AttachmentUrl = BlobUploadUtility.UploadFileStreamToBlob(BlobUploadUtility.Base64Decode(b64PicData), fromUser.UserID + fromUser.MobileNo + DateTime.Now, BlobUploadUtility.CONTAINER_CHATFILES);
+                        }
+                    }
+                }
                 using (var scope = new TransactionScope())
                 {
-                    UserMsg fromUser = sendMsgModel.FromUser;
-                    MessageModel message = sendMsgModel.Message;
-
-                    int toUser = message.UserModel.UserID;
-                    string toUserMobile = message.UserModel.MobileNo;
-                    message.UserModel = fromUser;
-                    message.UserID = toUser;
-
                     MessengerHub.pendingMessageList.Add(message);
-                    if (MessengerHub.pendingMessageList.Where(a => a.UserID == toUser).Count() <= 2)
+                    int pendingMsgcount = MessengerHub.pendingMessageList.Where(a => a.UserID == toUser).Count();
+                    scope.Complete();
+
+                    if (pendingMsgcount <= 2)
                     {
                         Delegate_SendNotification async = new Delegate_SendNotification(SendNotification);
                         async.BeginInvoke("gcm", "pendingMessage", toUserMobile, "pankaj", null, null);
-                    } 
-                    scope.Complete();
-                    return Ok();
+                    }
                 }
+
+                return Ok();
+
             }
             catch (Exception)
             {

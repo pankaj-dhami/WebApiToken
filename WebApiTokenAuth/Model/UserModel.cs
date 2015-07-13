@@ -58,6 +58,8 @@ namespace WebApiTokenAuth.Model
         public byte[] AttachmentData { get; set; }
         public string TextMessage { get; set; }
         public int UserID { get; set; }
+        public IEnumerable<string> Pic64Data { get; set; }
+        public bool IsAttchment { get; set; }
     }
 
     public class SendMsgModel

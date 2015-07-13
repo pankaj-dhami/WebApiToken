@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="AndroidMessengerModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="AndroidMessengerModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="tblappFriends">
           <Key>
             <PropertyRef Name="id" />
@@ -25,6 +25,9 @@
           <Property Name="PicUrl" Type="varchar(max)" />
           <Property Name="IsPicUpdate" Type="int" Nullable="false" />
         </EntityType>
+        <Function Name="uspAppUsers" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="userID" Type="int" Mode="In" />
+        </Function>
         <EntityContainer Name="AndroidMessengerModelStoreContainer">
           <EntitySet Name="tblappFriends" EntityType="Self.tblappFriends" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="tblappUsers" EntityType="Self.tblappUsers" Schema="dbo" store:Type="Tables" />

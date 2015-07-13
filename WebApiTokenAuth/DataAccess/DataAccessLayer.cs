@@ -19,16 +19,7 @@ namespace WebApiTokenAuth.DataAccess
 {
     public class DataAccessLayer
     {
-        string azureStorageAccount;
-        string azureStorageKey;
-        string azureStorageURI;
 
-        public DataAccessLayer()
-        {
-            azureStorageAccount = ConfigurationManager.AppSettings["storageAccount"];
-            azureStorageKey = ConfigurationManager.AppSettings["storageKey"];
-            azureStorageURI = ConfigurationManager.AppSettings["storageURI"];
-        }
 
         /// <summary>
         /// 
@@ -49,7 +40,6 @@ namespace WebApiTokenAuth.DataAccess
                         b64PicData = string.Join("/", user.Pic64Data);
                     }
 
-
                     tblappUser tbluser = (from item in entity.tblappUsers
                                           where item.MobileNo == user.MobileNo
                                           select item).FirstOrDefault();
@@ -64,7 +54,7 @@ namespace WebApiTokenAuth.DataAccess
                         entity.SaveChanges();
                         if (!string.IsNullOrEmpty(b64PicData))
                         {
-                            user.PictureUrl = UploadFileStreamToBlob(Base64Decode(b64PicData), tbluser.UserID + tbluser.MobileNo);
+                            user.PictureUrl = BlobUploadUtility.UploadFileStreamToBlob(BlobUploadUtility.Base64Decode(b64PicData), tbluser.UserID + tbluser.MobileNo, BlobUploadUtility.CONTAINER_IMAGE);
                         }
                         tbluser.PicUrl = user.PictureUrl;
                         entity.SaveChanges();
@@ -121,7 +111,7 @@ namespace WebApiTokenAuth.DataAccess
                         }
                         if (!string.IsNullOrEmpty(b64PicData))
                         {
-                            user.PictureUrl = UploadFileStreamToBlob(Base64Decode(b64PicData), tbluser.UserID + tbluser.MobileNo);
+                            user.PictureUrl = BlobUploadUtility.UploadFileStreamToBlob(BlobUploadUtility.Base64Decode(b64PicData), tbluser.UserID + tbluser.MobileNo, BlobUploadUtility.CONTAINER_IMAGE);
                             tbluser.PicUrl = user.PictureUrl;
                             tbluser.IsPicUpdate += 1;
                         }
@@ -197,7 +187,6 @@ namespace WebApiTokenAuth.DataAccess
                         result = new UserModel();
                         result.MobileNo = tbluser.MobileNo;
                         result.Name = tbluser.Name;
-
                         result.MyStatus = tbluser.MobileNo;
                         result.UserID = tbluser.UserID;
                         result.Password = tbluser.Password;
@@ -281,43 +270,13 @@ namespace WebApiTokenAuth.DataAccess
 
                                        }).ToList();
 
-                    foreach (var item in tblExistinguser)
-                    {
-                        item.PictureUrl = Base64Encode(item.PicData);
-                        item.PicData = null;
-                    }
+                   
                 }
                 catch (Exception)
                 {
                 }
             }
             return tblExistinguser;
-        }
-
-
-        public static string Base64Encode(byte[] bytes)
-        {
-            if (bytes == null)
-            {
-                return "";
-            }
-            else
-            {
-                return System.Convert.ToBase64String(bytes);
-            }
-        }
-
-        public static byte[] Base64Decode(string base64EncodedData)
-        {
-            if (string.IsNullOrEmpty(base64EncodedData))
-            {
-                return null;
-            }
-            else
-            {
-                var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
-                return base64EncodedBytes;
-            }
         }
 
         public static byte[] Compress(byte[] raw)
@@ -417,47 +376,6 @@ namespace WebApiTokenAuth.DataAccess
             return dataList;
         }
 
-        /// <summary>
-        /// to upload byte stream to blob 
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="fileName"></param>
-        /// <returns> the absolute image path of the uploaded file</returns>
-        public string UploadFileStreamToBlob(byte[] data, string fileName)
-        {
-            string absoluteFilePath = string.Empty;
-            fileName += ".png";
-            try
-            {
-                StorageCredentials credentials = new StorageCredentials(azureStorageAccount, azureStorageKey);
-                CloudStorageAccount account = new CloudStorageAccount(credentials, false);
-
-                CloudBlobClient blobClient = account.CreateCloudBlobClient();
-
-                CloudBlobContainer container = blobClient.GetContainerReference("images");
-
-                container.CreateIfNotExists();
-
-                CloudBlockBlob blob = container.GetBlockBlobReference(Path.GetFileName(fileName));
-
-                var permissions = new BlobContainerPermissions();
-                permissions.PublicAccess = BlobContainerPublicAccessType.Container;
-                container.SetPermissions(permissions);
-
-                //using (BlobStream blobStream = blob.OpenWrite())
-                //{
-                //    blobStream.Write(data, 0, data.Length);
-                //}
-
-                Stream stream = new MemoryStream(data);
-                blob.UploadFromStream(stream);
-                absoluteFilePath = azureStorageURI + "/images/" + fileName;
-            }
-            catch (Exception ex)
-            {
-                absoluteFilePath = string.Empty;
-            }
-            return absoluteFilePath;
-        }
+       
     }
 }
