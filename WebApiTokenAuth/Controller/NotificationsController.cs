@@ -16,6 +16,8 @@ namespace WebApiTokenAuth.Controller
     public class NotificationsController : ApiController
     {
         delegate void Delegate_SendNotification(string pns, string message, string to_tag, string userName);
+        delegate void Delegate_DeleteBlobs(IEnumerable<string> fileNames, string containerName);
+
         public async Task<HttpResponseMessage> Post(string pns, [FromBody]string message, string to_tag, string userName)
         {
             var user = userName;
@@ -69,11 +71,14 @@ namespace WebApiTokenAuth.Controller
                                       select new MessageModel
                                       {
                                           UserModel = item.UserModel,
-                                          TextMessage = item.TextMessage
+                                          TextMessage = item.TextMessage,
+                                          AttachmentUrl=item.AttachmentUrl
                                       }).ToList();
-
+               // Delegate_DeleteBlobs async = new Delegate_DeleteBlobs(BlobUploadUtility.DeleteBlobFile);
+               //a async.BeginInvoke(pendingMessage.Select(a => a.AttachmentUrl), BlobUploadUtility.CONTAINER_CHATFILES, null, null);
                 MessengerHub.pendingMessageList.RemoveAll(a => a.UserID == userID);
                 scope.Complete();
+                
                 return Ok(pendingMessage);
             }
         }
@@ -100,7 +105,7 @@ namespace WebApiTokenAuth.Controller
                         string b64PicData = string.Join("/", message.Pic64Data);
                         if (!string.IsNullOrEmpty(b64PicData))
                         {
-                            message.AttachmentUrl = BlobUploadUtility.UploadFileStreamToBlob(BlobUploadUtility.Base64Decode(b64PicData), fromUser.UserID + fromUser.MobileNo + DateTime.Now, BlobUploadUtility.CONTAINER_CHATFILES);
+                            message.AttachmentUrl = BlobUploadUtility.UploadFileStreamToBlob(BlobUploadUtility.Base64Decode(b64PicData), fromUser.UserID + fromUser.MobileNo + DateTime.Now.ToString().Replace('/', '_'), BlobUploadUtility.CONTAINER_CHATFILES);
                         }
                     }
                 }

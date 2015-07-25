@@ -16,8 +16,8 @@ namespace WebApiTokenAuth.Utility
         static string azureStorageKey;
         static string azureStorageURI;
 
-        public static string CONTAINER_IMAGE;
-        public static string CONTAINER_CHATFILES;
+        public static string CONTAINER_IMAGE = "images";
+        public static string CONTAINER_CHATFILES = "chatfiles";
 
 
         static BlobUploadUtility()
@@ -36,7 +36,8 @@ namespace WebApiTokenAuth.Utility
         public static string UploadFileStreamToBlob(byte[] data, string fileName, string containerName)
         {
             string absoluteFilePath = string.Empty;
-            fileName += ".png";
+            fileName = fileName.Replace(' ', '_').Replace(":", "_") + ".png";
+
             try
             {
                 StorageCredentials credentials = new StorageCredentials(azureStorageAccount, azureStorageKey);
@@ -48,7 +49,7 @@ namespace WebApiTokenAuth.Utility
 
                 container.CreateIfNotExists();
 
-                CloudBlockBlob blob = container.GetBlockBlobReference(Path.GetFileName(fileName));
+                CloudBlockBlob blob = container.GetBlockBlobReference(fileName);
 
                 var permissions = new BlobContainerPermissions();
                 permissions.PublicAccess = BlobContainerPublicAccessType.Container;
@@ -56,6 +57,7 @@ namespace WebApiTokenAuth.Utility
 
                 Stream stream = new MemoryStream(data);
                 blob.UploadFromStream(stream);
+
                 absoluteFilePath = azureStorageURI + "/" + containerName + "/" + fileName;
             }
             catch (Exception ex)
@@ -65,6 +67,34 @@ namespace WebApiTokenAuth.Utility
             return absoluteFilePath;
         }
 
+        public static void DeleteBlobFile(IEnumerable<string> fileNames, string containerName)
+        {
+            try
+            {
+                StorageCredentials credentials = new StorageCredentials(azureStorageAccount, azureStorageKey);
+                CloudStorageAccount account = new CloudStorageAccount(credentials, false);
+
+                CloudBlobClient blobClient = account.CreateCloudBlobClient();
+
+                CloudBlobContainer container = blobClient.GetContainerReference(containerName);
+
+                //container.CreateIfNotExists();
+                foreach (var item in fileNames)
+                {
+                    if (!string.IsNullOrEmpty(item))
+                    {
+                        CloudBlockBlob blob = container.GetBlockBlobReference(Path.GetFileName(item));
+                        blob.DeleteIfExistsAsync();
+                    }
+
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+
+        }
 
         public static string Base64Encode(byte[] bytes)
         {

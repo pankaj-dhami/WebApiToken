@@ -44,6 +44,7 @@ namespace WebApiTokenAuth.Hubs
 
         }
 
+     
         public void connectUser(UserMsg user)
         {
             Groups.Add(Context.ConnectionId, user.UserID.ToString());
